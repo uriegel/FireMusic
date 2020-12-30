@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -35,20 +36,31 @@ class MainActivity : ActivityEx(), CoroutineScope {
                 url = preferences.getString("url", "")
             }
             MainActivity.url = url!!
+            listItems()
+        }
+    }
 
-            fun onItemClick(film: String) {
+    private fun onItemClick(content: String) {
+        relativeUrl += "/" + content
+        listItems()
 //                val intent = Intent(this@MainActivity, PlayerActivity::class.java)
 //                intent.putExtra("film", film)
 //                startActivity(intent)
-            }
+    }
 
+    private fun listItems() {
+        launch {
             try {
-                val result = httpGet("${MainActivity.url}/music")
-                val files = Json.decodeFromString<Contents>(result).files
-                albums.adapter = AlbumsAdapter(files, ::onItemClick)
+                val addr = "${MainActivity.url}${relativeUrl}"
+                val result = httpGet(addr)
+                val contents = Json.decodeFromString<Contents>(result).files
+                albums.adapter =
+                    AlbumsAdapter(contents, ::onItemClick)
             } catch (e: Exception) { }
         }
     }
+
+    private var relativeUrl = "/music"
 
     companion object {
         lateinit var url: String

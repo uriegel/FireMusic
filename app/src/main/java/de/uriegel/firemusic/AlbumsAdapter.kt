@@ -23,7 +23,7 @@ class AlbumsAdapter(private val films: Array<String>, private val clickListener:
         holder.videoNameView.setOnClickListener { holder.clickListener(holder.film) }
     }
 
-    class ViewHolder(view: View, val clickListener: ((film: String)->Unit)) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View, val clickListener: (film: String)->Unit) : RecyclerView.ViewHolder(view) {
         init {
             view.setOnClickListener {clickListener(film) }
         }
