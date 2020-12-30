@@ -35,13 +35,22 @@ class MainActivity : ActivityEx(), CoroutineScope {
                 activityRequest(Intent(this@MainActivity, SettingsActivity::class.java))
                 url = preferences.getString("url", "")
             }
-            MainActivity.url = url!!
+            urlParts = arrayOf("${url}/music")
             listItems()
         }
     }
 
+    override fun onBackPressed() {
+        if (urlParts.size > 1) {
+            urlParts = urlParts.toList().dropLast(1).toTypedArray()
+            listItems()
+        }
+        else
+            super.onBackPressed()
+    }
+
     private fun onItemClick(content: String) {
-        relativeUrl += "/" + content
+        urlParts += content
         listItems()
 //                val intent = Intent(this@MainActivity, PlayerActivity::class.java)
 //                intent.putExtra("film", film)
@@ -51,7 +60,7 @@ class MainActivity : ActivityEx(), CoroutineScope {
     private fun listItems() {
         launch {
             try {
-                val addr = "${MainActivity.url}${relativeUrl}"
+                val addr = urlParts.joinToString(separator = "/")
                 val result = httpGet(addr)
                 val contents = Json.decodeFromString<Contents>(result).files
                 albums.adapter =
@@ -60,9 +69,5 @@ class MainActivity : ActivityEx(), CoroutineScope {
         }
     }
 
-    private var relativeUrl = "/music"
-
-    companion object {
-        lateinit var url: String
-    }
+    private var urlParts = arrayOf<String>()
 }
