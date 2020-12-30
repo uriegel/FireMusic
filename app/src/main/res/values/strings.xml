@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">FireMusic</string>
+
+    <!-- Preference Titles -->
+    <string name="url_header">URL</string>
+
+    <!-- Messages Preferences -->
+    <string name="url_title">Die URL des Servers (z.B. https://&lt;domäne&gt;/media)</string>
+
 </resources>
