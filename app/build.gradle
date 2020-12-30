@@ -45,4 +45,5 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.1.1'// JVM dependency
+    implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
 }

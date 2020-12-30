@@ -63,8 +63,16 @@ class MainActivity : ActivityEx(), CoroutineScope {
                 val addr = urlParts.joinToString(separator = "/")
                 val result = httpGet(addr)
                 val contents = Json.decodeFromString<Contents>(result).files
-                albums.adapter =
-                    AlbumsAdapter(contents, ::onItemClick)
+
+                val mp3s = contents.filter { it.toLowerCase().endsWith(".mp3") }
+                if (mp3s.isNotEmpty()) {
+                    val intent = Intent(this@MainActivity, AudioActivity::class.java)
+                    intent.putExtra("album", mp3s.toTypedArray())
+                    intent.putExtra("url", addr)
+                    startActivity(intent)
+                }
+                else
+                    albums.adapter = AlbumsAdapter(contents, ::onItemClick)
             } catch (e: Exception) { }
         }
     }
