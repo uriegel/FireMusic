@@ -2,11 +2,13 @@ package de.uriegel.firemusic
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
+import android.view.KeyEvent
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
+import kotlinx.android.synthetic.main.activity_audio.*
+import java.net.URLEncoder
 
 class AudioActivity : AppCompatActivity(), Player.EventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,7 +17,7 @@ class AudioActivity : AppCompatActivity(), Player.EventListener {
 
         val album = intent.getStringArrayExtra("album")!!
         val url = intent.getStringExtra("url")!!
-        playlist = album.map { "${url}/${it}" }.toTypedArray()
+        playlist = album.map { "${url}/${URLEncoder.encode(it, "utf-8")}" }.toTypedArray()
     }
 
     override fun onStart() {
@@ -23,26 +25,47 @@ class AudioActivity : AppCompatActivity(), Player.EventListener {
         initializePlayer()
     }
 
+    override fun onResume() {
+        super.onResume()
+        initializePlayer()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        releasePlayer()
+    }
+
     override fun onStop() {
         super.onStop()
         releasePlayer()
     }
 
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        playerView?.showController()
+        return super.onKeyDown(keyCode, event)
+    }
+
     private fun initializePlayer() {
-        player = SimpleExoPlayer.Builder(this).build()
+        if (player == null) {
+            player = SimpleExoPlayer.Builder(this).build()
+            playerView.player = player
 
-        playlist.forEach { player.addMediaItem(MediaItem.fromUri(it)) }
+            playlist.forEach { player!!.addMediaItem(MediaItem.fromUri(it)) }
 
-        //exoplayerView.player = simpleExoplayer
-        player.prepare();
-        // Start the playback.
-        player.play();
-        player.addListener(this)
+            //exoplayerView.player = simpleExoplayer
+            player!!.prepare();
+            // Start the playback.
+            player!!.playWhenReady = true
+            player!!.addListener(this)
+        }
     }
 
     private fun releasePlayer() {
-        //playbackPosition = simpleExoplayer.currentPosition
-        player.release()
+        if (player != null) {
+            //playbackPosition = simpleExoplayer.currentPosition
+            player!!.release()
+            player = null
+        }
     }
 
     override fun onPlayerError(error: ExoPlaybackException) {
@@ -56,6 +79,6 @@ class AudioActivity : AppCompatActivity(), Player.EventListener {
 //            progressBar.visibility = View.INVISIBLE
     }
 
-    private lateinit var player: SimpleExoPlayer
+    private var player: SimpleExoPlayer? = null
     private lateinit var playlist: Array<String>
 }

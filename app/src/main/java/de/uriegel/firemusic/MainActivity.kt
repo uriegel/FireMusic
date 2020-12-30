@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import java.net.URLEncoder
 
 class MainActivity : ActivityEx(), CoroutineScope {
 
@@ -50,11 +51,8 @@ class MainActivity : ActivityEx(), CoroutineScope {
     }
 
     private fun onItemClick(content: String) {
-        urlParts += content
+        urlParts += URLEncoder.encode(content, "utf-8")
         listItems()
-//                val intent = Intent(this@MainActivity, PlayerActivity::class.java)
-//                intent.putExtra("film", film)
-//                startActivity(intent)
     }
 
     private fun listItems() {
@@ -66,6 +64,7 @@ class MainActivity : ActivityEx(), CoroutineScope {
 
                 val mp3s = contents.filter { it.toLowerCase().endsWith(".mp3") }
                 if (mp3s.isNotEmpty()) {
+                    urlParts = urlParts.toList().dropLast(1).toTypedArray()
                     val intent = Intent(this@MainActivity, AudioActivity::class.java)
                     intent.putExtra("album", mp3s.toTypedArray())
                     intent.putExtra("url", addr)
