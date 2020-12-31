@@ -2,9 +2,9 @@ package de.uriegel.firemusic
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
+import kotlinx.serialization.Serializable
+import java.io.*
+import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.GZIPInputStream
@@ -15,9 +15,25 @@ suspend fun httpGet(urlString: String): String {
         val url = URL(urlString)
         val connection = url.openConnection() as HttpURLConnection
         connection.setRequestProperty("Accept-Encoding", "gzip")
-        connection.connect()
+        connection.responseCode
         val inStream = GZIPInputStream(connection.inputStream)
         return@withContext readStream(inStream)
+    }
+}
+
+@Suppress("BlockingMethodInNonBlockingContext")
+suspend fun httpPost(urlString: String, psk: String, data: String): String {
+    return withContext(Dispatchers.IO) {
+        val url = URL(urlString)
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("X-Auth-PSK", psk)
+        connection.doInput = true
+        val writer = BufferedWriter(OutputStreamWriter(connection.outputStream))
+        writer.write(data)
+        writer.close()
+        connection.responseCode
+        return@withContext readStream(connection.inputStream)
     }
 }
 

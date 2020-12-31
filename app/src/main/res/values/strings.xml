@@ -6,5 +6,10 @@
 
     <!-- Messages Preferences -->
     <string name="url_title">Die URL des Servers (z.B. https://&lt;domäne&gt;/media)</string>
+    <string name="sony_title">Sony Bravia</string>
+    <string name="sony_description">Die URL des Sony Bravia-Fernsehers, falls vorhanden</string>
+    <string name="menu_settings">Einstellungen</string>
+    <string name="sony_psk">Authentication PSK</string>
+    <string name="screen_off">Bildschirm ausschalten</string>
 
 </resources>

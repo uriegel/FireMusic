@@ -18,16 +18,16 @@ class AlbumsAdapter(private val films: Array<String>, private val clickListener:
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.film = films[position]
-        holder.videoNameView.text = holder.film
-        holder.videoNameView.setOnClickListener { holder.clickListener(holder.film) }
+        holder.album = films[position]
+        holder.videoNameView.text = holder.album
+        holder.videoNameView.setOnClickListener { holder.clickListener(holder.album) }
     }
 
-    class ViewHolder(view: View, val clickListener: (film: String)->Unit) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View, val clickListener: (album: String)->Unit) : RecyclerView.ViewHolder(view) {
         init {
-            view.setOnClickListener {clickListener(film) }
+            view.setOnClickListener {clickListener(album) }
         }
-        var film = ""
+        var album = ""
         val videoNameView: TextView = view.findViewById(R.id.albumNameView)
     }
 }

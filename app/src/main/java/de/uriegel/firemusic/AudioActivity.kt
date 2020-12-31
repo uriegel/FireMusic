@@ -2,15 +2,31 @@ package de.uriegel.firemusic
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.KeyEvent
+import android.view.View.GONE
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import kotlinx.android.synthetic.main.activity_audio.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.serialization.*
+import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 
-class AudioActivity : AppCompatActivity(), Player.EventListener {
+class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope {
+
+    @Serializable
+    data class SonyDataParam(val mode: String)
+
+    @Serializable
+    data class SonyData(val method: String, val version: String, val id: String, val params: Array<SonyDataParam>)
+
+    override val coroutineContext = Dispatchers.Main
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audio)
@@ -18,6 +34,20 @@ class AudioActivity : AppCompatActivity(), Player.EventListener {
         val album = intent.getStringArrayExtra("album")!!
         val url = intent.getStringExtra("url")!!
         playlist = album.map { "${url}/${URLEncoder.encode(it, "utf-8")}" }.toTypedArray()
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(this@AudioActivity)
+        val sonyUrl = preferences.getString("sony_url", "")
+        if (sonyUrl!!.length < 6)
+            powerSaving.visibility = GONE
+        val sonyPsk = preferences.getString("sony_psk", "")
+
+        powerSaving.setOnClickListener {
+            launch {
+                val data = SonyData("setPowerSavingMode", "1.0", "111", arrayOf(SonyDataParam("pictureOff")))
+                val content = Json.encodeToString(data)
+                httpPost(sonyUrl + "/system", sonyPsk!!, content)
+            }
+        }
     }
 
     override fun onStart() {
@@ -49,12 +79,8 @@ class AudioActivity : AppCompatActivity(), Player.EventListener {
         if (player == null) {
             player = SimpleExoPlayer.Builder(this).build()
             playerView.player = player
-
             playlist.forEach { player!!.addMediaItem(MediaItem.fromUri(it)) }
-
-            //exoplayerView.player = simpleExoplayer
-            player!!.prepare();
-            // Start the playback.
+            player!!.prepare()
             player!!.playWhenReady = true
             player!!.addListener(this)
         }

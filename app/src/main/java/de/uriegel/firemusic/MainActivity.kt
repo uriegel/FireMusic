@@ -1,19 +1,22 @@
 package de.uriegel.firemusic
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.Window
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
+import java.util.*
+
 
 class MainActivity : ActivityEx(), CoroutineScope {
 
@@ -28,6 +31,10 @@ class MainActivity : ActivityEx(), CoroutineScope {
 
         albums.layoutManager = GridLayoutManager(this, 6)
         albums.setHasFixedSize(true)
+
+        fun isTV(): Boolean { return android.os.Build.MODEL.contains("AFT") }
+        if (isTV())
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         launch {
             val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
@@ -50,6 +57,28 @@ class MainActivity : ActivityEx(), CoroutineScope {
             super.onBackPressed()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id: Int = item.getItemId()
+        if (id == R.id.menu_settings) {
+            showSettings()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_MENU)
+            showSettings()
+        return super.onKeyDown(keyCode, event)
+    }
+
+    private fun showSettings() { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) }
+
     private fun onItemClick(content: String) {
         urlParts += URLEncoder.encode(content, "utf-8")
         listItems()
@@ -62,7 +91,7 @@ class MainActivity : ActivityEx(), CoroutineScope {
                 val result = httpGet(addr)
                 val contents = Json.decodeFromString<Contents>(result).files
 
-                val mp3s = contents.filter { it.toLowerCase().endsWith(".mp3") }
+                val mp3s = contents.filter { it.toLowerCase(Locale.getDefault()).endsWith(".mp3") }
                 if (mp3s.isNotEmpty()) {
                     urlParts = urlParts.toList().dropLast(1).toTypedArray()
                     val intent = Intent(this@MainActivity, AudioActivity::class.java)
