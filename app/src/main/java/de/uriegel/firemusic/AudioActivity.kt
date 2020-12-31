@@ -23,7 +23,7 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
     data class SonyDataParam(val mode: String)
 
     @Serializable
-    data class SonyData(val method: String, val version: String, val id: String, val params: Array<SonyDataParam>)
+    data class SonyData(val method: String, val version: String, val id: Int, val params: Array<SonyDataParam>)
 
     override val coroutineContext = Dispatchers.Main
 
@@ -43,7 +43,7 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
 
         powerSaving.setOnClickListener {
             launch {
-                val data = SonyData("setPowerSavingMode", "1.0", "111", arrayOf(SonyDataParam("pictureOff")))
+                val data = SonyData("setPowerSavingMode", "1.0", 111, arrayOf(SonyDataParam("pictureOff")))
                 val content = Json.encodeToString(data)
                 httpPost(sonyUrl + "/system", sonyPsk!!, content)
             }

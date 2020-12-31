@@ -32,7 +32,6 @@ suspend fun httpPost(urlString: String, psk: String, data: String): String {
         val writer = BufferedWriter(OutputStreamWriter(connection.outputStream))
         writer.write(data)
         writer.close()
-        connection.responseCode
         return@withContext readStream(connection.inputStream)
     }
 }
