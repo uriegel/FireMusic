@@ -1,14 +1,15 @@
 package de.uriegel.firemusic
 
+import android.app.ActionBar
 import android.content.Intent
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.Window
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlinx.android.synthetic.main.activity_main.*
+import de.uriegel.firemusic.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,14 +28,16 @@ class MainActivity : ActivityEx(), CoroutineScope {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        albums.layoutManager = GridLayoutManager(this, 6)
-        albums.setHasFixedSize(true)
 
         fun isTV(): Boolean { return android.os.Build.MODEL.contains("AFT") }
         if (isTV())
-            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setTheme(R.style.Theme_FireMusic)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.albums.layoutManager = GridLayoutManager(this, 6)
+        binding.albums.setHasFixedSize(true)
 
         launch {
             val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
@@ -77,7 +80,12 @@ class MainActivity : ActivityEx(), CoroutineScope {
         return super.onKeyDown(keyCode, event)
     }
 
-    private fun showSettings() { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) }
+    private fun showSettings() { startActivity(
+        Intent(
+            this@MainActivity,
+            SettingsActivity::class.java
+        )
+    ) }
 
     private fun onItemClick(content: String) {
         urlParts += URLEncoder.encode(content, "utf-8")
@@ -100,10 +108,11 @@ class MainActivity : ActivityEx(), CoroutineScope {
                     startActivity(intent)
                 }
                 else
-                    albums.adapter = AlbumsAdapter(contents, ::onItemClick)
+                    binding.albums.adapter = AlbumsAdapter(contents, ::onItemClick)
             } catch (e: Exception) { }
         }
     }
 
     private var urlParts = arrayOf<String>()
+    private lateinit var binding: ActivityMainBinding
 }

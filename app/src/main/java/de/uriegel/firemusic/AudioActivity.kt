@@ -2,14 +2,14 @@ package de.uriegel.firemusic
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.KeyEvent
 import android.view.View.GONE
+import androidx.preference.PreferenceManager
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
-import kotlinx.android.synthetic.main.activity_audio.*
+import de.uriegel.firemusic.databinding.ActivityAudioBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +29,8 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_audio)
+        binding = ActivityAudioBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         val album = intent.getStringArrayExtra("album")!!
         val url = intent.getStringExtra("url")!!
@@ -38,10 +39,10 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
         val preferences = PreferenceManager.getDefaultSharedPreferences(this@AudioActivity)
         val sonyUrl = preferences.getString("sony_url", "")
         if (sonyUrl!!.length < 6)
-            powerSaving.visibility = GONE
+            binding.powerSaving.visibility = GONE
         val sonyPsk = preferences.getString("sony_psk", "")
 
-        powerSaving.setOnClickListener {
+        binding.powerSaving.setOnClickListener {
             launch {
                 val data = SonyData("setPowerSavingMode", "1.0", 111, arrayOf(SonyDataParam("pictureOff")))
                 val content = Json.encodeToString(data)
@@ -71,14 +72,14 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        playerView?.showController()
+        binding.playerView.showController()
         return super.onKeyDown(keyCode, event)
     }
 
     private fun initializePlayer() {
         if (player == null) {
             player = SimpleExoPlayer.Builder(this).build()
-            playerView.player = player
+            binding.playerView.player = player
             playlist.forEach { player!!.addMediaItem(MediaItem.fromUri(it)) }
             player!!.prepare()
             player!!.playWhenReady = true
@@ -107,4 +108,5 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
 
     private var player: SimpleExoPlayer? = null
     private lateinit var playlist: Array<String>
+    private lateinit var binding: ActivityAudioBinding
 }
