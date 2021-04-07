@@ -48,6 +48,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 url = preferences.getString("url", "")
             }
             urlParts = arrayOf("${url}/music")
+
+            basicAuthentication(preferences.getString("name", "")!!, preferences.getString("auth_pw", "")!!)
+
             listItems()
         }
     }
