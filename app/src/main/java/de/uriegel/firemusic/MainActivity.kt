@@ -1,14 +1,15 @@
 package de.uriegel.firemusic
 
-import android.app.ActionBar
 import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.view.Window
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
+import de.uriegel.activityextensions.ActivityRequest
+import de.uriegel.activityextensions.http.*
 import de.uriegel.firemusic.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +20,7 @@ import java.net.URLEncoder
 import java.util.*
 
 
-class MainActivity : ActivityEx(), CoroutineScope {
+class MainActivity : AppCompatActivity(), CoroutineScope {
 
     override val coroutineContext = Dispatchers.Main
 
@@ -43,7 +44,7 @@ class MainActivity : ActivityEx(), CoroutineScope {
             val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
             var url = preferences.getString("url", "")
             if (url!!.length < 6) {
-                activityRequest(Intent(this@MainActivity, SettingsActivity::class.java))
+                activityRequest.launch(Intent(this@MainActivity, SettingsActivity::class.java))
                 url = preferences.getString("url", "")
             }
             urlParts = arrayOf("${url}/music")
@@ -96,7 +97,7 @@ class MainActivity : ActivityEx(), CoroutineScope {
         launch {
             try {
                 val addr = urlParts.joinToString(separator = "/")
-                val result = httpGet(addr)
+                val result = getString(addr)
                 val contents = Json.decodeFromString<Contents>(result).files
 
                 val mp3s = contents.filter { it.toLowerCase(Locale.getDefault()).endsWith(".mp3") }
@@ -113,6 +114,7 @@ class MainActivity : ActivityEx(), CoroutineScope {
         }
     }
 
+    private val activityRequest = ActivityRequest(this)
     private var urlParts = arrayOf<String>()
     private lateinit var binding: ActivityMainBinding
 }

@@ -9,6 +9,7 @@ import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
+import de.uriegel.activityextensions.http.post
 import de.uriegel.firemusic.databinding.ActivityAudioBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +47,7 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
             launch {
                 val data = SonyData("setPowerSavingMode", "1.0", 111, arrayOf(SonyDataParam("pictureOff")))
                 val content = Json.encodeToString(data)
-                httpPost(sonyUrl + "/system", sonyPsk!!, content)
+                post(sonyUrl + "/system", content, sonyPsk)
             }
         }
     }
