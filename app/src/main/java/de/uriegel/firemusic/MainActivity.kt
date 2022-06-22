@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private fun listItems() {
         launch {
             try {
-                val addr = urlParts.joinToString(separator = "/")
+                val addr = urlParts.joinToString(separator = "/").replace("+", "%20")
                 val result = getString(addr)
                 val contents = Json.decodeFromString<Contents>(result).files
 
