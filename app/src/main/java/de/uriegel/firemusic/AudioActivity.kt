@@ -81,7 +81,7 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
         if (player == null) {
             player = SimpleExoPlayer.Builder(this).build()
             binding.playerView.player = player
-            playlist.forEach { player!!.addMediaItem(MediaItem.fromUri(it)) }
+            playlist.forEach { player!!.addMediaItem(MediaItem.fromUri(it.replace("+", "%20"))) }
             player!!.prepare()
             player!!.playWhenReady = true
             player!!.addListener(this)
@@ -96,7 +96,7 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
         }
     }
 
-    override fun onPlayerError(error: ExoPlaybackException) {
+    fun onPlayerError(error: ExoPlaybackException) {
         // handle error
     }
 
