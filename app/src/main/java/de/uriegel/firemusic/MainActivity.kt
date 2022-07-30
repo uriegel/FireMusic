@@ -19,7 +19,7 @@ import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 import java.util.*
 
-
+@ExperimentalSerializationApi
 class MainActivity : AppCompatActivity(), CoroutineScope {
 
     override val coroutineContext = Dispatchers.Main
@@ -39,6 +39,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         binding.albums.layoutManager = GridLayoutManager(this, 6)
         binding.albums.setHasFixedSize(true)
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         launch {
             val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
@@ -50,8 +54,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             urlParts = arrayOf("${url}/music")
 
             basicAuthentication(preferences.getString("name", "")!!, preferences.getString("auth_pw", "")!!)
+            MainActivity.url = url!!
 
+            registerDisk()
             listItems()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        launch {
+            unregisterDisk()
         }
     }
 
@@ -120,4 +133,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private val activityRequest = ActivityRequest(this)
     private var urlParts = arrayOf<String>()
     private lateinit var binding: ActivityMainBinding
+
+    companion object {
+        lateinit var url: String
+    }
 }

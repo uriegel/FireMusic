@@ -9,6 +9,7 @@ import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.util.Util
 import de.uriegel.activityextensions.http.post
 import de.uriegel.firemusic.databinding.ActivityAudioBinding
 import kotlinx.coroutines.CoroutineScope
@@ -18,6 +19,7 @@ import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 
+@ExperimentalSerializationApi
 class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope {
 
     @Serializable
@@ -54,22 +56,42 @@ class AudioActivity : AppCompatActivity(), Player.EventListener, CoroutineScope 
 
     override fun onStart() {
         super.onStart()
-        initializePlayer()
+        if (Util.SDK_INT > 23) {
+            launch {
+                registerDisk()
+                initializePlayer()
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        initializePlayer()
+        if (Util.SDK_INT <= 23) {
+            launch {
+                registerDisk()
+                initializePlayer()
+            }
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        releasePlayer()
+        if (Util.SDK_INT <= 23) {
+            launch {
+                releasePlayer()
+                unregisterDisk()
+            }
+        }
     }
 
     override fun onStop() {
         super.onStop()
-        releasePlayer()
+        if (Util.SDK_INT > 23) {
+            launch {
+                releasePlayer()
+                unregisterDisk()
+            }
+        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
