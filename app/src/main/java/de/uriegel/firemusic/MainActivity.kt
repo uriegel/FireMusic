@@ -56,15 +56,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             basicAuthentication(preferences.getString("name", "")!!, preferences.getString("auth_pw", "")!!)
             MainActivity.url = url!!
 
-            registerDisk()
+            accessDisk()
             listItems()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        launch {
-            unregisterDisk()
         }
     }
 
